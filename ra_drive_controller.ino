@@ -4,7 +4,7 @@ const int btnForwardPin = 8;
 const int btnStopPin = 9;
 const int btnBackwardPin = 10;
 
-Stepper myStepper(4096, 3, 5, 4, 6);
+Stepper myStepper(32, 3, 5, 4, 6);
 
 void setup() {
   pinMode(btnForwardPin, INPUT_PULLUP);
@@ -13,7 +13,8 @@ void setup() {
 
 //  Serial.begin(9600);
 
-//  myStepper.setSpeed(15);
+//  myStepper.setSpeed(1000);
+//  myStepper.step(2048);
 }
 
 const unsigned long MICROS_INTERVAL = 48695;
@@ -36,7 +37,7 @@ unsigned long lastMicros = 0;
 const unsigned long BUTTON_CLICK_INTERVAL = 300;
 unsigned long lastTimeButtonClick = 0;
 
-void loop() {    
+void loop() {
   btnValue = digitalRead(btnForwardPin);
   if (btnValue == LOW) {
     onClickBtnForward();
