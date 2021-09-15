@@ -66,7 +66,6 @@ void onClickBtnForward() {
   const unsigned long currentMillis = millis();
   if (currentMillis - lastTimeButtonClick > BUTTON_CLICK_INTERVAL) {
     lastTimeButtonClick = currentMillis;
-    Serial.println("onClickBtnForward()");
     clickedOnDirectionButton(true);
   }
 }
@@ -75,7 +74,6 @@ void onClickBtnBackward() {
   const unsigned long currentMillis = millis();
   if (currentMillis - lastTimeButtonClick > BUTTON_CLICK_INTERVAL) {
     lastTimeButtonClick = currentMillis;
-    Serial.println("onClickBtnBackward()");
     clickedOnDirectionButton(false);
   }
 }
@@ -83,88 +81,46 @@ void onClickBtnBackward() {
 void clickedOnDirectionButton(const bool isForward) {
   switch (velocity) {
     case VELOCITY_0:
-      Serial.println("VELOCITY_0 start");
-      Serial.println("velocity=" + String(velocity));
-      Serial.println("rotationDirection=" + String(rotationDirection));
       velocity = VELOCITY_1;
       rotationDirection = isForward ? DIRECTION_CW : DIRECTION_CCW;
-      Serial.println("VELOCITY_0 middle");
-      Serial.println("velocity=" + String(velocity));
-      Serial.println("rotationDirection=" + String(rotationDirection));
-      Serial.println("VELOCITY_0 end");
       break;
 
     case VELOCITY_1:
-      Serial.println("VELOCITY_1 start");
-      Serial.println("velocity=" + String(velocity));
-      Serial.println("rotationDirection=" + String(rotationDirection));
       if (rotationDirection == (isForward ? DIRECTION_CCW : DIRECTION_CW)) {
         velocity = VELOCITY_0;
       } else {
         velocity = VELOCITY_2;
       }
-      Serial.println("VELOCITY_1 middle");
-      Serial.println("velocity=" + String(velocity));
-      Serial.println("rotationDirection=" + String(rotationDirection));
-      Serial.println("VELOCITY_1 end");
       break;
 
     case VELOCITY_2:
-      Serial.println("VELOCITY_2 start");
-      Serial.println("velocity=" + String(velocity));
-      Serial.println("rotationDirection=" + String(rotationDirection));
       if (rotationDirection == (isForward ? DIRECTION_CCW : DIRECTION_CW)) {
         velocity = VELOCITY_1;
       } else {
         velocity = VELOCITY_3;
       }
-      Serial.println("VELOCITY_2 middle");
-      Serial.println("velocity=" + String(velocity));
-      Serial.println("rotationDirection=" + String(rotationDirection));
-      Serial.println("VELOCITY_2 end");
       break;
 
     case VELOCITY_3:
-      Serial.println("VELOCITY_3 start");
-      Serial.println("velocity=" + String(velocity));
-      Serial.println("rotationDirection=" + String(rotationDirection));
       if (rotationDirection == (isForward ? DIRECTION_CCW : DIRECTION_CW)) {
         velocity = VELOCITY_2;
       } else {
         velocity = VELOCITY_4;
       }
-      Serial.println("VELOCITY_3 middle");
-      Serial.println("velocity=" + String(velocity));
-      Serial.println("rotationDirection=" + String(rotationDirection));
-      Serial.println("VELOCITY_3 end");
       break;
 
     case VELOCITY_4:
-      Serial.println("VELOCITY_4 start");
-      Serial.println("velocity=" + String(velocity));
-      Serial.println("rotationDirection=" + String(rotationDirection));
       if (rotationDirection == (isForward ? DIRECTION_CCW : DIRECTION_CW)) {
         velocity = VELOCITY_3;
       } else {
         velocity = VELOCITY_5;
       }
-      Serial.println("VELOCITY_4 middle");
-      Serial.println("velocity=" + String(velocity));
-      Serial.println("rotationDirection=" + String(rotationDirection));
-      Serial.println("VELOCITY_4 end");
       break;
 
     case VELOCITY_5:
-      Serial.println("VELOCITY_5 start");
-      Serial.println("velocity=" + String(velocity));
-      Serial.println("rotationDirection=" + String(rotationDirection));
       if (rotationDirection == (isForward ? DIRECTION_CCW : DIRECTION_CW)) {
         velocity = VELOCITY_4;
       }
-      Serial.println("VELOCITY_5 middle");
-      Serial.println("velocity=" + String(velocity));
-      Serial.println("rotationDirection=" + String(rotationDirection));
-      Serial.println("VELOCITY_5 end");
       break;
   }
 
@@ -175,7 +131,6 @@ void onClickBtnStop() {
   const unsigned long currentMillis = millis();
   if (currentMillis - lastTimeButtonClick > BUTTON_CLICK_INTERVAL) {
     lastTimeButtonClick = currentMillis;
-    Serial.println("onClickBtnStop()");
     velocity = VELOCITY_0;
     motor.stop();
   }
