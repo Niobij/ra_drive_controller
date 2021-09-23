@@ -6,9 +6,9 @@ const int btnBackwardPin = 10;
 
 AccelStepper motor(AccelStepper::HALF4WIRE, 3, 5, 4, 6);
 
-const float maxSpeed = 1024;
-const float siderealSpeed = 20.5360723908529;
-const float stepsPerRevolution = 4096;
+const int MAX_SPEED = 1024;
+const float SIDEREAL_SPEED = 20.5360723908529;
+const int STEPS_PER_REVOLUTION = 4096;
 
 void setup() {
   pinMode(btnForwardPin, INPUT_PULLUP);
@@ -16,23 +16,21 @@ void setup() {
   pinMode(btnStopPin, INPUT_PULLUP);
 
   //  Serial.begin(9600);
-  
-  motor.setAcceleration(maxSpeed);
+
+  motor.setAcceleration(MAX_SPEED);
 }
 
 const int DIRECTION_CW = 1;
 const int DIRECTION_CCW = -1;
 
-const unsigned int VELOCITY_0 = 0;
-const unsigned int VELOCITY_1 = 1;
-const unsigned int VELOCITY_2 = 4;
-const unsigned int VELOCITY_3 = 8;
-const unsigned int VELOCITY_4 = 12;
-const unsigned int VELOCITY_5 = 28;
+int rotationDirection = DIRECTION_CW;
+
+const float VELOCITIES[8] { 0, 0.7, 1, 2, 4, 8, 12, 28 };
+const int VELOCITIES_FIRST_POSITION = 0;
+const int VELOCITIES_LAST_POSITION = 7;
+int velocitiesPosition = 0;
 
 int btnValue = -1;
-int rotationDirection = DIRECTION_CW;
-unsigned int velocity = VELOCITY_0;
 unsigned long lastMicros = 0;
 
 const unsigned long BUTTON_CLICK_INTERVAL = 300;
@@ -54,11 +52,11 @@ void loop() {
     onClickBtnStop();
   }
 
-  if (velocity == VELOCITY_0) {
+  if (velocitiesPosition == VELOCITIES_FIRST_POSITION) {
     return;
   }
 
-  motor.move(stepsPerRevolution * rotationDirection);
+  motor.move(STEPS_PER_REVOLUTION * rotationDirection);
   motor.run();
 }
 
@@ -79,59 +77,45 @@ void onClickBtnBackward() {
 }
 
 void clickedOnDirectionButton(const bool isForward) {
-  switch (velocity) {
-    case VELOCITY_0:
-      velocity = VELOCITY_1;
-      rotationDirection = isForward ? DIRECTION_CW : DIRECTION_CCW;
-      break;
-
-    case VELOCITY_1:
-      if (rotationDirection == (isForward ? DIRECTION_CCW : DIRECTION_CW)) {
-        velocity = VELOCITY_0;
+  if (VELOCITIES_FIRST_POSITION == velocitiesPosition) {
+    increaseVelocitiesPosition();
+    rotationDirection = isForward ? DIRECTION_CW : DIRECTION_CCW;
+  } else {
+    if (DIRECTION_CW == rotationDirection) {
+      if (isForward) {
+        increaseVelocitiesPosition();
       } else {
-        velocity = VELOCITY_2;
+        decreaseVelocitiesPosition();
       }
-      break;
-
-    case VELOCITY_2:
-      if (rotationDirection == (isForward ? DIRECTION_CCW : DIRECTION_CW)) {
-        velocity = VELOCITY_1;
+    } else {
+      if (isForward) {
+        decreaseVelocitiesPosition();
       } else {
-        velocity = VELOCITY_3;
+        increaseVelocitiesPosition();
       }
-      break;
-
-    case VELOCITY_3:
-      if (rotationDirection == (isForward ? DIRECTION_CCW : DIRECTION_CW)) {
-        velocity = VELOCITY_2;
-      } else {
-        velocity = VELOCITY_4;
-      }
-      break;
-
-    case VELOCITY_4:
-      if (rotationDirection == (isForward ? DIRECTION_CCW : DIRECTION_CW)) {
-        velocity = VELOCITY_3;
-      } else {
-        velocity = VELOCITY_5;
-      }
-      break;
-
-    case VELOCITY_5:
-      if (rotationDirection == (isForward ? DIRECTION_CCW : DIRECTION_CW)) {
-        velocity = VELOCITY_4;
-      }
-      break;
+    }
   }
 
-  motor.setMaxSpeed(siderealSpeed * velocity);
+  motor.setMaxSpeed(SIDEREAL_SPEED * VELOCITIES[velocitiesPosition]);
+}
+
+void increaseVelocitiesPosition() {
+  if (velocitiesPosition < VELOCITIES_LAST_POSITION) {
+    velocitiesPosition++;
+  }
+}
+
+void decreaseVelocitiesPosition() {
+  if (velocitiesPosition > VELOCITIES_FIRST_POSITION) {
+    velocitiesPosition--;
+  }
 }
 
 void onClickBtnStop() {
   const unsigned long currentMillis = millis();
   if (currentMillis - lastTimeButtonClick > BUTTON_CLICK_INTERVAL) {
     lastTimeButtonClick = currentMillis;
-    velocity = VELOCITY_0;
+    velocitiesPosition = VELOCITIES_FIRST_POSITION;
     motor.stop();
   }
 }
