@@ -15,7 +15,7 @@ void setup() {
   pinMode(btnBackwardPin, INPUT_PULLUP);
   pinMode(btnStopPin, INPUT_PULLUP);
 
-  //  Serial.begin(9600);
+  Serial.begin(9600);
 
   motor.setAcceleration(MAX_SPEED);
 }
@@ -30,27 +30,10 @@ const int VELOCITIES_FIRST_POSITION = 0;
 const int VELOCITIES_LAST_POSITION = 7;
 int velocitiesPosition = 0;
 
-int btnValue = -1;
-unsigned long lastMicros = 0;
-
-const unsigned long BUTTON_CLICK_INTERVAL = 300;
-unsigned long lastTimeButtonClick = 0;
-
 void loop() {
-  btnValue = digitalRead(btnForwardPin);
-  if (btnValue == LOW) {
-    onClickBtnForward();
-  }
-
-  btnValue = digitalRead(btnBackwardPin);
-  if (btnValue == LOW) {
-    onClickBtnBackward();
-  }
-
-  btnValue = digitalRead(btnStopPin);
-  if (btnValue == LOW) {
-    onClickBtnStop();
-  }
+  if (checkBtnForward() ||
+      checkBtnBackward() ||
+      checkBtnStop());
 
   if (velocitiesPosition == VELOCITIES_FIRST_POSITION) {
     return;
@@ -60,20 +43,100 @@ void loop() {
   motor.run();
 }
 
-void onClickBtnForward() {
+const unsigned long BUTTON_CLICK_INTERVAL = 50;
+
+int lastForwardButtonState = -1;
+int currentForwardButtonState = -1;
+int forwardButtonState = -1;
+unsigned long lastTimeForwardButtonClick = 0;
+
+bool checkBtnForward() {
+  currentForwardButtonState = digitalRead(btnForwardPin);
   const unsigned long currentMillis = millis();
-  if (currentMillis - lastTimeButtonClick > BUTTON_CLICK_INTERVAL) {
-    lastTimeButtonClick = currentMillis;
-    clickedOnDirectionButton(true);
+
+  if (currentForwardButtonState != lastForwardButtonState) {
+    lastTimeForwardButtonClick = currentMillis;
   }
+
+  if (currentMillis - lastTimeForwardButtonClick > BUTTON_CLICK_INTERVAL) {
+    if (currentForwardButtonState != forwardButtonState) {
+      forwardButtonState = currentForwardButtonState;
+      if (forwardButtonState == LOW) {
+        onClickBtnForward();
+        return true;
+      }
+    }
+  }
+
+  lastForwardButtonState = currentForwardButtonState;
+
+  return false;
+}
+
+int lastBackwardButtonState = -1;
+int currentBackwardButtonState = -1;
+int backwardButtonState = -1;
+unsigned long lastTimeBackwardButtonClick = 0;
+
+bool checkBtnBackward() {
+  currentBackwardButtonState = digitalRead(btnBackwardPin);
+  const unsigned long currentMillis = millis();
+
+  if (currentBackwardButtonState != lastBackwardButtonState) {
+    lastTimeBackwardButtonClick = currentMillis;
+  }
+
+  if (currentMillis - lastTimeBackwardButtonClick > BUTTON_CLICK_INTERVAL) {
+    if (currentBackwardButtonState != backwardButtonState) {
+      backwardButtonState = currentBackwardButtonState;
+      if (backwardButtonState == LOW) {
+        onClickBtnBackward();
+        return true;
+      }
+    }
+  }
+
+  lastBackwardButtonState = currentBackwardButtonState;
+
+  return false;
+}
+
+int lastStopButtonState = -1;
+int currentStopButtonState = -1;
+int stopButtonState = -1;
+unsigned long lastTimeStopButtonClick = 0;
+
+bool checkBtnStop() {
+  currentStopButtonState = digitalRead(btnStopPin);
+  const unsigned long currentMillis = millis();
+
+  if (currentStopButtonState != lastStopButtonState) {
+    lastTimeStopButtonClick = currentMillis;
+  }
+
+  if (currentMillis - lastTimeStopButtonClick > BUTTON_CLICK_INTERVAL) {
+    if (currentStopButtonState != stopButtonState) {
+      stopButtonState = currentStopButtonState;
+      if (stopButtonState == LOW) {
+        onClickBtnStop();
+        return true;
+      }
+    }
+  }
+
+  lastStopButtonState = currentStopButtonState;
+
+  return false;
+}
+
+void onClickBtnForward() {
+  Serial.println("onClickBtnForward()");
+  clickedOnDirectionButton(true);
 }
 
 void onClickBtnBackward() {
-  const unsigned long currentMillis = millis();
-  if (currentMillis - lastTimeButtonClick > BUTTON_CLICK_INTERVAL) {
-    lastTimeButtonClick = currentMillis;
-    clickedOnDirectionButton(false);
-  }
+  Serial.println("onClickBtnBackward()");
+  clickedOnDirectionButton(false);
 }
 
 void clickedOnDirectionButton(const bool isForward) {
@@ -112,10 +175,7 @@ void decreaseVelocitiesPosition() {
 }
 
 void onClickBtnStop() {
-  const unsigned long currentMillis = millis();
-  if (currentMillis - lastTimeButtonClick > BUTTON_CLICK_INTERVAL) {
-    lastTimeButtonClick = currentMillis;
-    velocitiesPosition = VELOCITIES_FIRST_POSITION;
-    motor.stop();
-  }
+  Serial.println("onClickBtnStop()");
+  velocitiesPosition = VELOCITIES_FIRST_POSITION;
+  motor.stop();
 }
